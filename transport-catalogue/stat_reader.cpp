@@ -1,45 +1,26 @@
 #include "stat_reader.h"
 
-#include <algorithm>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <set>
+#include <ostream>
 
 namespace transport_catalogue {
+
+    void PrintStopInfo(const TransportCatalogue& transport_catalogue, std::string_view request, std::ostream& output) {
+        std::string_view stop_name = request.substr(request.find_first_of(' ') + 1);
+        output << transport_catalogue.GetInfo(stop_name, "Stop") << std::endl;
+    }
+
+    void PrintBusInfo(const TransportCatalogue& transport_catalogue, std::string_view request, std::ostream& output) {
+        std::string_view bus_name = request.substr(request.find_first_of(' ') + 1);
+        output << transport_catalogue.GetInfo(bus_name, "Bus") << std::endl;
+    }
 
     void ParseAndPrintStat(const TransportCatalogue& transport_catalogue, std::string_view request, std::ostream& output) {
         std::string_view request_type = request.substr(0, request.find_first_of(' '));
         if (request_type == "Bus") {
-            auto* bus = transport_catalogue.GetBus(request.substr(request.find_first_of(' ') + 1));
-            if (bus) {
-                output << request << ": " << bus->stops.size() << " stops on route, "
-                    << transport_catalogue.GetUniqueStops(bus) << " unique stops, " << std::setprecision(6) << transport_catalogue.GetDistance(bus) << " route length" << std::endl;
-            }
-            else {
-                output << request << ": not found" << std::endl;
-            }
+            PrintBusInfo(transport_catalogue, request, output);
         }
         else {
-            std::string_view stop_name = request.substr(request.find_first_of(' ') + 1);
-            const TransportCatalogue::Stop* stop = transport_catalogue.GetStop(stop_name);
-            if (stop) {
-                std::unordered_set<TransportCatalogue::Bus*> buses = transport_catalogue.GetBusesFromStop(stop);
-                if (buses.empty()) {
-                    output << request << ": no buses" << std::endl;
-                }
-                else {
-                    std::set<const TransportCatalogue::Bus*, TransportCatalogue::BusComparator> sorted_buses(buses.begin(), buses.end());
-                    output << request << ": buses ";
-                    for (const TransportCatalogue::Bus* bus : sorted_buses) {
-                        output << bus->bus_name << " ";
-                    }
-                    output << std::endl;
-                }
-            }
-            else {
-                output << request << ": not found" << std::endl;
-            }
+            PrintStopInfo(transport_catalogue, request, output);
         }
     }
 

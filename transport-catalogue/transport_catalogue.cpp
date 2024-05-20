@@ -1,7 +1,10 @@
-#include "transport_catalogue.h"
 #include <algorithm>
-#include "stat_reader.h"
 #include <iostream>
+#include <iomanip>
+#include <set>
+#include <sstream>
+
+#include "transport_catalogue.h"
 
 namespace transport_catalogue {
     using namespace geo;
@@ -39,6 +42,42 @@ namespace transport_catalogue {
         return it != busname_to_bus_.end() ? it->second : nullptr;
     }
 
+    std::string TransportCatalogue::GetInfo(std::string_view name, std::string_view type) const {
+        std::ostringstream out;
+        if (type == "Bus") {
+            auto* bus_name = GetBus(name);
+            if (bus) {
+                const Bus* bus = bus_name;
+                out << name << ": " << bus->stops.size() << " stops on route, ";
+                out << GetUniqueStops(bus) << " unique stops, ";
+                out << std::setprecision(6) << GetDistance(bus) << " route length";
+            }
+            else {
+                out << name << ": not found";
+            }
+        }
+        else if (type == "Stop") {
+            auto* stop_name = GetStop(name);
+            if (stop_name) {
+                const Stop* stop = stop_name;
+                if (stop->buses.empty()) {
+                    out << name << ": no buses";
+                }
+                else {
+                    std::set<const Bus*, BusComparator> sorted_buses(stop->buses.begin(), stop->buses.end());
+                    out << name << ": buses ";
+                    for (const Bus* bus : sorted_buses) {
+                        out << bus->bus_name << " ";
+                    }
+                }
+            }
+            else {
+                out << name << ": not found";
+            }
+        }
+        return out.str();
+    }
+
     double TransportCatalogue::GetDistance(const Bus* bus) const {
         double distance = 0.0;
         const auto& stops = bus->stops;
@@ -52,12 +91,6 @@ namespace transport_catalogue {
         std::unordered_set<const Stop*> stops;
         stops.insert(bus->stops.begin(), bus->stops.end());
         return stops.size();
-    }
-
-    std::unordered_set<TransportCatalogue::Bus*> TransportCatalogue::GetBusesFromStop(const Stop* stop) const {
-        std::unordered_set<Bus*> buses;
-        buses.insert(stop->buses.begin(), stop->buses.end());
-        return buses;
     }
 
 }
