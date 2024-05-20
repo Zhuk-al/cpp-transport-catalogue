@@ -25,6 +25,11 @@ namespace transport_catalogue {
             std::vector<Stop*> stops; // контейнер остановок маршрута
         };
 
+        struct BusStat {
+            double bus_distance;
+            int bus_unique_stops;
+        };
+
         struct BusComparator {
             bool operator()(const Bus* lhs, const Bus* rhs) const {
                 return lhs->bus_name < rhs->bus_name;
@@ -37,7 +42,7 @@ namespace transport_catalogue {
         const Stop* GetStop(std::string_view stop) const;
         const Bus* GetBus(std::string_view bus) const;
 
-        std::string GetInfo(std::string_view name, std::string_view type) const;
+        BusStat GetBusInfo(const Bus* bus) const;
 
     private:
         std::deque<Stop> stops_; // контейнер всех остановок
