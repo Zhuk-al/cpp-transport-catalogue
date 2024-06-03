@@ -23,9 +23,10 @@ namespace transport_catalogue {
         }
 
         auto not_space2 = str.find_first_not_of(' ', comma + 1);
+        auto comma2 = str.find(',', comma + 1);
 
         double lat = std::stod(std::string(str.substr(not_space, comma - not_space)));
-        double lng = std::stod(std::string(str.substr(not_space2)));
+        double lng = std::stod(std::string(str.substr(not_space2, comma2 - not_space2)));
 
         return { lat, lng };
     }
@@ -107,11 +108,37 @@ namespace transport_catalogue {
         }
     }
 
+    std::vector<std::pair<std::string_view, int>> ParseDistances(std::string_view str) {
+        std::vector<std::pair<std::string_view, int>> result;
+        std::vector<std::string_view> descriptions = Split(str, ',');
+        for (size_t i = 2; i < descriptions.size(); ++i) {
+            std::string_view dist_com = descriptions[i];
+            size_t m_pos = dist_com.find('m');
+            assert(m_pos != dist_com.npos);
+            std::string distance_str{Trim(dist_com.substr(0, m_pos))};
+            int distance = std::stoi(distance_str);
+            std::string_view stop_name = Trim(dist_com.substr(m_pos + 4));
+            result.emplace_back(std::make_pair(stop_name, distance));
+        }
+        return result;
+    }
+
     void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) const {
         for (const auto& command : commands_) {
             if (command.command == "Stop") {
                 Coordinates coordinates = ParseCoordinates(command.description);
                 catalogue.AddStop(command.id, coordinates);
+            }
+        }
+
+        for (const auto& command : commands_) {
+            if (command.command == "Stop") {
+                std::vector<TransportCatalogue::Distance> distance_to_stop;
+                auto distances = ParseDistances(command.description);
+                for (const auto& distance : distances) {
+                    distance_to_stop.push_back({ catalogue.GetStop(command.id), catalogue.GetStop(distance.first), distance.second });
+                    catalogue.SetDistance(distance_to_stop);
+                }
             }
         }
 
