@@ -29,11 +29,9 @@ namespace transport_catalogue {
         busname_to_bus_.insert({ bus_pointer->bus_name, bus_pointer });
     }
 
-    void TransportCatalogue::SetDistance(std::vector<Distance> distances) {
-        for (auto distance : distances) {
-            auto stop_pair = std::make_pair(distance.A, distance.B);
-            distance_to_stop_.insert({ stop_pair, distance.distance });
-        }
+    void TransportCatalogue::SetDistance(const Stop* stop_from, const Stop* stop_to, int distances) {
+        auto stop_pair = std::make_pair(stop_from, stop_to);
+        distance_to_stop_.insert({ stop_pair, distances });
     }
 
     const TransportCatalogue::Stop* TransportCatalogue::GetStop(std::string_view stop) const {
@@ -57,8 +55,8 @@ namespace transport_catalogue {
     double TransportCatalogue::GetDistance(const Bus* bus) const {
         double distance = 0.0;
         const auto& stops = bus->stops;
-        for (size_t i = 0; i < stops.size() - 1; ++i) {
-            distance += ComputeDistance(stops[i]->coordinates, stops[i + 1]->coordinates);
+        for (size_t i = 1; i < stops.size(); ++i) {
+            distance += ComputeDistance(stops[i - 1]->coordinates, stops[i]->coordinates);
         }
         return distance;
     }
@@ -84,8 +82,8 @@ namespace transport_catalogue {
     size_t TransportCatalogue::GetDistanceBus(const Bus* bus) const {
         size_t distance = 0;
         const auto& stops = bus->stops;
-        for (size_t i = 0; i < stops.size() - 1; ++i) {
-            distance += GetDistanceStop(bus->stops[i], bus->stops[i + 1]);
+        for (size_t i = 1; i < stops.size(); ++i) {
+            distance += GetDistanceStop(bus->stops[i - 1], bus->stops[i]);
         }
         return distance;
     }

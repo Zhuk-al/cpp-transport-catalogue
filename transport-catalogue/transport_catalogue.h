@@ -24,12 +24,6 @@ namespace transport_catalogue {
             std::vector<Stop*> stops;
         };
 
-        struct Distance {
-            const Stop* A;
-            const Stop* B;
-            int distance;
-        };
-
         struct BusStat {
             int bus_all_stops;
             int bus_unique_stops;
@@ -56,7 +50,7 @@ namespace transport_catalogue {
 
         void AddStop(const std::string& stop, const Coordinates& coordinates);
         void AddBus(const std::string& bus, const std::vector<std::string_view>& stops);
-        void SetDistance(std::vector<Distance> distances);
+        void SetDistance(const Stop* stop_from, const Stop* stop_to, int distances);
 
         const Stop* GetStop(std::string_view stop) const;
         const Bus* GetBus(std::string_view bus) const;

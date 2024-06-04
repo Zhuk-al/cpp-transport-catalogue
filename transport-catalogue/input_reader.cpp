@@ -133,11 +133,9 @@ namespace transport_catalogue {
 
         for (const auto& command : commands_) {
             if (command.command == "Stop") {
-                std::vector<TransportCatalogue::Distance> distance_to_stop;
                 auto distances = ParseDistances(command.description);
                 for (const auto& distance : distances) {
-                    distance_to_stop.push_back({ catalogue.GetStop(command.id), catalogue.GetStop(distance.first), distance.second });
-                    catalogue.SetDistance(distance_to_stop);
+                    catalogue.SetDistance(catalogue.GetStop(command.id), catalogue.GetStop(distance.first), distance.second);
                 }
             }
         }
