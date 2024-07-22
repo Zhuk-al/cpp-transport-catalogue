@@ -1,81 +1,7 @@
 #include "request_handler.h"
-#include <sstream>
  
 namespace request_handler {
     
-Node RequestHandler::ExecuteMakeNodeStop(int id_request, StopQueryInfo stop_info) {
-    Dict result;
-    Array buses;
-    std::string str_not_found = "not found";
-    
-    if (stop_info.not_found) {
-        result.emplace("request_id", Node(id_request));
-        result.emplace("error_message", Node(str_not_found));
-        
-    }
-    else {
-        result.emplace("request_id", Node(id_request));        
-        for (std::string bus_name : stop_info.buses_name) {
-            buses.push_back(Node(bus_name));
-        }      
-        result.emplace("buses", Node(buses));
-    }   
-    return Node(result);
-}
- 
-Node RequestHandler::ExecuteMakeNodeBus(int id_request, BusQueryInfo bus_info) {
-    Dict result;
-    std::string str_not_found = "not found";
-
-    if (bus_info.not_found) {
-        result.emplace("request_id", Node(id_request));
-        result.emplace("error_message", Node(str_not_found));
-    }
-    else {
-        result.emplace("request_id", Node(id_request));        
-        result.emplace("curvature", Node(bus_info.curvature));
-        result.emplace("route_length", Node(bus_info.route_length));
-        result.emplace("stop_count", Node(bus_info.stops_on_route));
-        result.emplace("unique_stop_count", Node(bus_info.unique_stops));
-    }    
-    return Node(result);
-}    
-      
-Node RequestHandler::ExecuteMakeNodeMap(int id_request, TransportCatalogue& catalogue, RenderSettings render_settings) {
-    Dict result;
-    std::ostringstream map_stream;
-    std::string map_str;
- 
-    MapRenderer map_catalogue(render_settings);      
-    map_catalogue.InitSphereProjector(GetStopsCoordinates(catalogue));
-    ExecuteRenderMap(map_catalogue, catalogue);
-    map_catalogue.GetStreamMap(map_stream);
-    map_str = map_stream.str();
- 
-    result.emplace("request_id", Node(id_request));
-    result.emplace("map", Node(map_str));
-    
-    return Node(result);
-}
-    
-void RequestHandler::ExecuteQueries(TransportCatalogue& catalogue, std::vector<StatRequest>& stat_requests, RenderSettings& render_settings) {
-    std::vector<Node> result_request;
-    
-    for (StatRequest req : stat_requests) {      
-        if (req.type == "Stop") {
-            result_request.push_back(ExecuteMakeNodeStop(req.id, StopQuery(catalogue, req.name)));
-        }
-        else if (req.type == "Bus") {
-            result_request.push_back(ExecuteMakeNodeBus(req.id, BusQuery(catalogue, req.name)));
-        }
-        else if(req.type == "Map") {            
-            result_request.push_back(ExecuteMakeNodeMap(req.id, catalogue, render_settings));
-        }  
-        
-    }  
-    doc_out = Document{Node(result_request)};
-}
- 
 void RequestHandler::ExecuteRenderMap(MapRenderer& map_catalogue, TransportCatalogue& catalogue) const {
     std::vector<std::pair<Bus*, int>> buses_palette;  
     std::vector<Stop*> stops_sort;
@@ -205,10 +131,6 @@ StopQueryInfo RequestHandler::StopQuery(TransportCatalogue& catalogue, std::stri
         stop_info.not_found = true;
     }   
     return stop_info;
-}
-    
-const Document& RequestHandler::GetDocument(){
-    return doc_out;
 }
     
 } //end namespace request_handler

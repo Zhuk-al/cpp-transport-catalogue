@@ -2,13 +2,13 @@
  
 namespace transport_catalogue {  
     
-void TransportCatalogue::AddStop(Stop&& stop) {
+void TransportCatalogue::AddStop(const Stop&& stop) {
     stops_.push_back(std::move(stop));
     Stop* stop_pointer = &stops_.back();
     stopname_to_stop_[stop_pointer->name] = stop_pointer;
 }
  
-void TransportCatalogue::AddBus(Bus&& bus) {
+void TransportCatalogue::AddBus(const Bus&& bus) {
     Bus* bus_pointer;
     
     buses_.push_back(std::move(bus)); 
@@ -23,18 +23,18 @@ void TransportCatalogue::AddBus(Bus&& bus) {
 }
  
 void TransportCatalogue::SetDistance(const std::vector<Distance>& distances) {
-    for (auto distance : distances){
+    for (const auto& distance : distances) {
         auto dist_pair = std::make_pair(distance.stop_from, distance.stop_to);
-        distance_to_stop_.insert(DistanceMap::value_type(dist_pair, distance.distance));
+        distance_to_stop_.emplace(dist_pair, distance.distance);
     }
 }
  
-Bus* TransportCatalogue::GetBus(std::string_view bus) {
+std::unordered_map<std::string_view, Bus*> TransportCatalogue::GetBus(std::string_view bus) {
     auto it = busname_to_bus_.find(bus);
     return it != busname_to_bus_.end() ? it->second : nullptr;
 }
  
-Stop* TransportCatalogue::GetStop(std::string_view stop) {
+std::unordered_map<std::string_view, Stop*> TransportCatalogue::GetStop(std::string_view stop) {
     auto it = stopname_to_stop_.find(stop);
     return it != stopname_to_stop_.end() ? it->second : nullptr;
 }
@@ -47,13 +47,13 @@ StopMap TransportCatalogue::GetStopnameToStop() const {
     return stopname_to_stop_;
 }
  
-std::unordered_set<const Stop*> TransportCatalogue::GetUniqStops(Bus* bus) {
+std::unordered_set<const Stop*> TransportCatalogue::GetUniqStops(const Bus* bus) {
     std::unordered_set<const Stop*> stops;   
     stops.insert(bus->stops.begin(), bus->stops.end());    
     return stops;
 }
  
-double TransportCatalogue::GetDistance(Bus* bus) {
+double TransportCatalogue::GetDistance(const Bus* bus) {
     double distance = 0.0;
     const auto& stops = bus->stops;
     for (size_t i = 1; i < stops.size(); ++i) {
@@ -63,7 +63,7 @@ double TransportCatalogue::GetDistance(Bus* bus) {
     return distance;
 }
  
-std::unordered_set<const Bus*> TransportCatalogue::StopGetUniqBuses(Stop* stop){
+std::unordered_set<const Bus*> TransportCatalogue::StopGetUniqBuses(const Stop* stop){
     std::unordered_set<const Bus*> unique_stops;        
     unique_stops.insert(stop->buses.begin(), stop->buses.end());   
     return unique_stops;
@@ -77,7 +77,7 @@ size_t TransportCatalogue::GetDistanceStop(const Stop* stop_start, const Stop* s
     return it->second;
 }
  
-size_t TransportCatalogue::GetDistanceBus(Bus* bus) {
+size_t TransportCatalogue::GetDistanceBus(const Bus* bus) {
     size_t distance = 0;
     const auto& stops = bus->stops;
     for (size_t i = 1; i < stops.size(); ++i) {

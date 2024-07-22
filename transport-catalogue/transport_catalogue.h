@@ -22,38 +22,34 @@ public:
 private:
     std::hash<const void*> hasher_;
 };
-    
-typedef  std::unordered_map<std::string_view, Stop*> StopMap;
-typedef  std::unordered_map<std::string_view, Bus*> BusMap;
-typedef  std::unordered_map<std::pair<const Stop*, const  Stop*>, int, DistanceHasher> DistanceMap;
  
 class TransportCatalogue {
 public:      
-    void AddBus(Bus&& bus);
-    void AddStop(Stop&& stop);
+    void AddBus(const Bus&& bus);
+    void AddStop(const Stop&& stop);
     void SetDistance(const std::vector<Distance>& distances);
     
     Bus* GetBus(std::string_view bus_name);
     Stop* GetStop(std::string_view stop_name);
     
-    BusMap GetBusnameToBus() const;
-    StopMap GetStopnameToStop() const;
+    std::unordered_map<std::string_view, Bus*> GetBusnameToBus() const;
+    std::unordered_map<std::string_view, Stop*> GetStopnameToStop() const;
     
-    std::unordered_set<const Bus*> StopGetUniqBuses(Stop* stop);
-    std::unordered_set<const Stop*> GetUniqStops(Bus* bus);
+    std::unordered_set<const Bus*> StopGetUniqBuses(const Stop* stop);
+    std::unordered_set<const Stop*> GetUniqStops(const Bus* bus);
 
     size_t GetDistanceStop(const Stop* start, const Stop* finish);
-    size_t GetDistanceBus(Bus* bus);
-    double GetDistance(Bus* bus);
+    size_t GetDistanceBus(const Bus* bus);
+    double GetDistance(const Bus* bus);
     
 private:    
     std::deque<Stop> stops_;
-    StopMap stopname_to_stop_;
+    std::unordered_map<std::string_view, Stop*> stopname_to_stop_;
     
     std::deque<Bus> buses_;
-    BusMap busname_to_bus_;
+    std::unordered_map<std::string_view, Bus*> busname_to_bus_;
     
-    DistanceMap distance_to_stop_;
+    std::unordered_map<std::pair<const Stop*, const  Stop*>, int, DistanceHasher> distance_to_stop_;
     
 };
     
