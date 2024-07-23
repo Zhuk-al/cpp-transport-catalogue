@@ -28,8 +28,7 @@ Stop JSONReader::ParseNodeStop(Node& node) {
     return stop;
 }
     
-std::vector<Distance> JSONReader::ParseNodeDistances(Node& node, TransportCatalogue& catalogue) {
-    std::vector<Distance> distances;
+void JSONReader::ParseNodeDistances(Node& node, TransportCatalogue& catalogue) {
     Dict stop_node;
     Dict stop_road_map;
     std::string begin_name;
@@ -44,16 +43,14 @@ std::vector<Distance> JSONReader::ParseNodeDistances(Node& node, TransportCatalo
             for (auto [key, value] : stop_road_map) {
                 last_name = key;
                 distance = value.AsInt();
-                distances.push_back({ catalogue.GetStop(begin_name),
-                                      catalogue.GetStop(last_name), distance });
+                catalogue.SetDistance(catalogue.GetStop(begin_name),
+                                      catalogue.GetStop(last_name), distance);
             }
         }
         catch (...) {
             std::cout << "invalide road" << std::endl;
         }
     }
-    
-    return distances;
 }
  
 Bus JSONReader::ParseNodeBus(Node& node, TransportCatalogue& catalogue) {
@@ -122,7 +119,7 @@ void JSONReader::ParseNodeBase(const Node& root, TransportCatalogue& catalogue){
         }
 
         for (auto stop : stops) {
-            catalogue.SetDistance(ParseNodeDistances(stop, catalogue));
+            ParseNodeDistances(stop, catalogue);
         }
 
         for (auto bus : buses) {

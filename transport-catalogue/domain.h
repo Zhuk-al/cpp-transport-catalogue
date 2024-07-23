@@ -30,12 +30,6 @@ struct Bus {
     size_t route_length;
 };
  
-struct Distance {    
-    const Stop* stop_from;
-    const Stop* stop_to;
-    int distance;
-};  
- 
 struct BusQueryInfo {
     std::string_view name;
     bool not_found;

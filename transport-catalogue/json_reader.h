@@ -25,7 +25,7 @@ public:
     
     Stop ParseNodeStop(Node& node);
     Bus ParseNodeBus(Node& node, TransportCatalogue& catalogue);
-    std::vector<Distance> ParseNodeDistances(Node& node, TransportCatalogue& catalogue);
+    void ParseNodeDistances(Node& node, TransportCatalogue& catalogue);
 
     Node ExecuteMakeNodeStop(int id_request, StopQueryInfo query_result);
     Node ExecuteMakeNodeBus(int id_request, BusQueryInfo query_result);

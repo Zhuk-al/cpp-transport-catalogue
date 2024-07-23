@@ -25,9 +25,13 @@ private:
  
 class TransportCatalogue {
 public:      
-    void AddBus(const Bus&& bus);
-    void AddStop(const Stop&& stop);
-    void SetDistance(const std::vector<Distance>& distances);
+    void AddBus(const Bus& bus);
+    void AddStop(const Stop& stop);
+
+    // мы это отработали, Вы мне всё объяснили, почему так будет лучше, но я всё вернул..
+    // так что это я извиняюсь :) буду стараться лучше
+    // а за все замечания, прошедшие и будущие, по ТС большое спасибо!
+    void SetDistance(const Stop* stop_from, const Stop* stop_to, int distances);
     
     Bus* GetBus(std::string_view bus_name);
     Stop* GetStop(std::string_view stop_name);
