@@ -67,7 +67,7 @@ std::unordered_set<const Bus*> TransportCatalogue::StopGetUniqBuses(const Stop* 
     return unique_stops;
 }
  
-size_t TransportCatalogue::GetDistanceStop(const Stop* stop_start, const Stop* stop_finish) {
+size_t TransportCatalogue::GetDistanceStop(const Stop* stop_start, const Stop* stop_finish) const {
     auto it = distance_to_stop_.find({ stop_start, stop_finish });
     if (it == distance_to_stop_.end()) {
         it = distance_to_stop_.find({ stop_finish, stop_start });

@@ -28,9 +28,6 @@ public:
     void AddBus(const Bus& bus);
     void AddStop(const Stop& stop);
 
-    // мы это отработали, Вы мне всё объяснили, почему так будет лучше, но я всё вернул..
-    // так что это я извиняюсь :) буду стараться лучше
-    // а за все замечания, прошедшие и будущие, по ТС большое спасибо!
     void SetDistance(const Stop* stop_from, const Stop* stop_to, int distances);
     
     Bus* GetBus(std::string_view bus_name);
@@ -42,7 +39,7 @@ public:
     std::unordered_set<const Bus*> StopGetUniqBuses(const Stop* stop);
     std::unordered_set<const Stop*> GetUniqStops(const Bus* bus);
 
-    size_t GetDistanceStop(const Stop* start, const Stop* finish);
+    size_t GetDistanceStop(const Stop* start, const Stop* finish) const;
     size_t GetDistanceBus(const Bus* bus);
     double GetDistance(const Bus* bus);
     
