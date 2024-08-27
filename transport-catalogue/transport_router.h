@@ -19,22 +19,13 @@ using namespace graph;
  
 class TransportRouter {
 public:
-    void SetRoutingSettings(RoutingSettings routing_settings);
-    const RoutingSettings& GetRoutingSettings() const;
- 
+    TransportRouter(const RoutingSettings& routing_settings, TransportCatalogue& transport_catalogue);
+
+    std::optional<RouteInfo> GetRouteInfo(Stop* stop_from, Stop* stop_to) const;
+    
+private:
     void BuildRouter(TransportCatalogue& transport_catalogue);
- 
-    const DirectedWeightedGraph<double>& GetGraph() const;
-    const Router<double>& GetRouter() const;
-    const std::variant<StopEdge, BusEdge>& GetEdge(EdgeId id) const;
-    
-    std::optional<RouterByStop> GetRouterByStop(Stop* stop) const;
-    std::optional<RouteInfo> GetRouteInfo(VertexId start, VertexId end) const;
- 
-    const std::unordered_map<Stop*, RouterByStop>& GetStopToVertex() const;
-    const std::unordered_map<EdgeId, std::variant<StopEdge, BusEdge>>& GetEdgeIdToEdge() const;
-    
-private:    
+
     std::unordered_map<Stop*, RouterByStop> stop_to_router_;
     std::unordered_map<EdgeId, std::variant<StopEdge, BusEdge>> edge_id_to_edge_;
     

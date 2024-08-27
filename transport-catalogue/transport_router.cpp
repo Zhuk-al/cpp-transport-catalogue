@@ -4,12 +4,9 @@ namespace transport_catalogue {
 namespace detail {
 namespace router {
  
-void TransportRouter::SetRoutingSettings(RoutingSettings routing_settings) {
-    routing_settings_ = std::move(routing_settings);
-}
-
-const RoutingSettings& TransportRouter::GetRoutingSettings() const {
-    return routing_settings_;
+TransportRouter::TransportRouter(const RoutingSettings& routing_settings, TransportCatalogue& transport_catalogue)
+    : routing_settings_(routing_settings) {
+    BuildRouter(transport_catalogue);
 }
  
 void TransportRouter::BuildRouter(TransportCatalogue& transport_catalogue) {
@@ -18,44 +15,30 @@ void TransportRouter::BuildRouter(TransportCatalogue& transport_catalogue) {
     router_ptr_->Build();
 }
  
-const DirectedWeightedGraph<double>& TransportRouter::GetGraph() const {
-    return *graph_ptr_;
-}
+std::optional<RouteInfo> TransportRouter::GetRouteInfo(Stop* stop_from, Stop* stop_to) const {
 
-const Router<double>& TransportRouter::GetRouter() const {
-    return *router_ptr_;
-}
-
-const std::variant<StopEdge, BusEdge>& TransportRouter::GetEdge(EdgeId id) const {
-    return edge_id_to_edge_.at(id);
-}
- 
-std::optional<RouterByStop> TransportRouter::GetRouterByStop(Stop* stop) const {
-    if (!stop_to_router_.count(stop)) {
+    if (!stop_from || !stop_to) {
         return std::nullopt;
     }
-    return stop_to_router_.at(stop);
-}
- 
-std::optional<RouteInfo> TransportRouter::GetRouteInfo(VertexId start, graph::VertexId end) const {
-    const auto& route_info = router_ptr_->BuildRoute(start, end);
+
+    VertexId from_vertex = stop_to_router_.at(stop_from).bus_wait_start;
+    VertexId to_vertex = stop_to_router_.at(stop_to).bus_wait_end;
+
+    auto route_info = router_ptr_->BuildRoute(from_vertex, to_vertex);
+
     if (!route_info) {
         return std::nullopt;
     }
-    RouteInfo result;
-    result.total_time = route_info->weight;      
-    for (const auto edge : route_info->edges) {
-        result.edges.emplace_back(GetEdge(edge));
-    }       
-    return result;       
-}   
-    
-const std::unordered_map<Stop*, RouterByStop>& TransportRouter::GetStopToVertex() const {
-    return stop_to_router_;
-}
 
-const std::unordered_map<EdgeId, std::variant<StopEdge, BusEdge>>& TransportRouter::GetEdgeIdToEdge() const {
-    return edge_id_to_edge_;
+    RouteInfo result;
+    result.total_time = route_info->weight;
+
+    for (const auto edge_id : route_info->edges) {
+        const auto& edge = edge_id_to_edge_.at(edge_id);
+        result.edges.emplace_back(edge);
+    }
+
+    return result;
 }
     
 std::deque<Stop*> TransportRouter::GetStopsPtr(TransportCatalogue& transport_catalogue) {

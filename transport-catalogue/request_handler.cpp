@@ -138,8 +138,7 @@ namespace request_handler {
         TransportCatalogue& catalogue,
         TransportRouter& routing) const {
 
-        return routing.GetRouteInfo(routing.GetRouterByStop(catalogue.GetStop(start))->bus_wait_start,
-            routing.GetRouterByStop(catalogue.GetStop(end))->bus_wait_start);
+        return routing.GetRouteInfo(catalogue.GetStop(start), catalogue.GetStop(end));
     }
      
 } //end namespace request_handler
